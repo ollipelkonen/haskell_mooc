@@ -96,15 +96,13 @@ data State = Start | Eggs | Sugar | Flour | FlourSugar | Mixed | Error | Finishe
   deriving (Eq,Show)
 
 step :: State -> Event -> State
-step Start addEggs  = Eggs
+step Start AddEggs  = Eggs
 step Start _        = Error
-step Eggs addFlour  = Flour
+step Eggs AddFlour  = Flour
 step Eggs AddSugar  = Sugar
 step Eggs _         = Error
-step Flour addFlour = Flour
 step Flour AddSugar = FlourSugar
 step Flour _        = Error
-step Sugar addSugar = Sugar
 step Sugar AddFlour = FlourSugar
 step Sugar _        = Error
 step FlourSugar Mix = Mixed
@@ -113,6 +111,7 @@ step Mixed Bake     = Finished
 step Mixed _        = Error
 step Finished _     = Finished
 step Error _        = Error
+step _ _ = Error
 
 -- do not edit this
 bake :: [Event] -> State
@@ -141,9 +140,9 @@ average (x:|xs) = (sum list) / fromIntegral (length list)
 -- PS. The Data.List.NonEmpty type has been imported for you
 
 reverseNonEmpty :: NonEmpty a -> NonEmpty a
--- reverseNonEmpty (x:|xs) = reverseNonEmpty (nonEmpty xs) ++ x
---reverseNonEmpty (n:|nx) = foldr (\x xs -> x <> xs) n nx
-reverseNonEmpty = todo
+reverseNonEmpty (x :| []) = x:|[]
+reverseNonEmpty (x :| xs) = head rev :| tail rev
+  where rev = reverse (x:xs)
 
 ------------------------------------------------------------------------------
 -- Ex 6: implement Semigroup instances for the Distance, Time and
@@ -172,14 +171,10 @@ instance Semigroup Velocity where
 --
 -- What are the class constraints for the instances?
 
--- add a (Set n) = if member a (Set n) then Set n else Set $ sort (a:n)
--- instance Eq a => Eq (List a) where
-instance Semigroup (Set a) where
-  --x <> Set y = foldr (\a b -> add b a) x y
-  --x <> y = x
-  Set x <> Set y = Set (x <> y)
+instance (Eq a, Ord a) => Semigroup (Set a) where
+  Set x <> Set y = Set (nub (sort $ x <> y))
 
-instance Monoid (Set a) where
+instance (Eq a, Ord a) => Monoid (Set a) where
   mempty = emptySet
 
 
